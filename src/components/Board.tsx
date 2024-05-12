@@ -1,43 +1,90 @@
 "use client";
-import { useState } from "react";
-import Column from "./Column";
-import NewColumnForm from "./forms/NewColumnForm";
+import { updateBoard } from "@/app/actions/boardActions";
+import {
+  RoomProvider,
+  useMyPresence,
+  useUpdateMyPresence,
+} from "@/app/liveblocks.config";
+import { BoardContextProvider } from "@/components/BoardContext";
+import Columns from "@/components/Columns";
+import { faCog } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { LiveList } from "@liveblocks/core";
+import { ClientSideSuspense } from "@liveblocks/react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { FormEvent, useEffect, useState } from "react";
 
-const defaultcolumns = [
-  { id: "col1", name: "todo", index: 0 },
-  { id: "col2", name: "in progres", index: 1 },
-  { id: "col3", name: "done", index: 2 },
-];
+export default function Board({ id, name }: { id: string; name: string }) {
+  const [renameMode, setRenameMode] = useState(false);
+  const router = useRouter();
+  const updateMyPresence = useUpdateMyPresence();
 
-export type CardType = {
-  name: string;
-  id: string | number;
-  index: number;
-  columnId: string;
-};
+  useEffect(() => {
+    updateMyPresence({ boardId: id });
 
-const defaultcards = [
-  { id: "a", name: "task 1", index: 0, columnId: "col1" },
-  { id: "aa", name: "task 5", index: 1, columnId: "col1" },
-  { id: "b", name: "task 2", index: 1, columnId: "col2" },
-  { id: "c", name: "task 3", index: 2, columnId: "col3" },
-];
-export default function Board() {
-  const [cards, setCards] = useState(defaultcards);
-  const [columns, setColumn] = useState(defaultcolumns);
+    return () => {
+      updateMyPresence({ boardId: null });
+    };
+  }, []);
+
+  async function handleNameSubmit(ev: FormEvent) {
+    ev.preventDefault();
+    const input = (ev.target as HTMLFormElement).querySelector("input");
+    if (input) {
+      const newName = input.value;
+      await updateBoard(id, { metadata: { boardName: newName } });
+      input.value = "";
+      setRenameMode(false);
+      router.refresh();
+    }
+  }
+
   return (
-    <div className="flex gap-4">
-      {columns.map((column) => (
-        <Column
-          key={column.id}
-          {...column}
-          setCards={setCards}
-          cards={cards
-            .sort((a, b) => a.index - b.index)
-            .filter((c) => c.columnId === column.id)}
-        />
-      ))}
-      <NewColumnForm />
-    </div>
+    <BoardContextProvider>
+      <RoomProvider
+        id={id}
+        initialPresence={{
+          cardId: null,
+          boardId: null,
+        }}
+        initialStorage={{
+          columns: new LiveList(),
+          cards: new LiveList(),
+        }}
+      >
+        <ClientSideSuspense fallback={<div>loading...</div>}>
+          {() => (
+            <>
+              <div className="flex gap-2 justify-between items-center mb-4">
+                <div>
+                  {!renameMode && (
+                    <h1
+                      className="text-2xl"
+                      onClick={() => setRenameMode(true)}
+                    >
+                      Board: {name}
+                    </h1>
+                  )}
+                  {renameMode && (
+                    <form onSubmit={handleNameSubmit}>
+                      <input type="text" defaultValue={name} />
+                    </form>
+                  )}
+                </div>
+                <Link
+                  className="flex gap-2 items-center btn"
+                  href={`/boards/${id}/settings`}
+                >
+                  <FontAwesomeIcon icon={faCog} />
+                  Board settings
+                </Link>
+              </div>
+              <Columns />
+            </>
+          )}
+        </ClientSideSuspense>
+      </RoomProvider>
+    </BoardContextProvider>
   );
 }
