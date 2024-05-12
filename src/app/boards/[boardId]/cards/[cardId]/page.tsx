@@ -7,6 +7,8 @@ type PageProps = {
   };
 };
 
-export default function CardPage({ params }: PageProps) {
-  return <BoardPage params={params} />;
+export default function CardPage({params}:PageProps) {
+  return (
+    <BoardPage params={params} />
+  );
 }

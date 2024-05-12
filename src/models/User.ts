@@ -1,4 +1,4 @@
-import { model, models, Schema } from "mongoose";
+import {model, models, Schema} from 'mongoose';
 
 type ModelsType = {
   User: any;
@@ -17,4 +17,4 @@ const userSchema = new Schema({
   emailVerified: Date,
 });
 
-export const User = (models as ModelsType)?.User || model("User", userSchema);
+export const User = (models as ModelsType)?.User || model('User', userSchema);
