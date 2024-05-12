@@ -15,7 +15,7 @@ const textFont = Poppins({
 
 export default function LoginView() {
   return (
-    <div className="flex items-center justify-center flex-col py-36">
+    <div className="flex items-center justify-center flex-col py-32">
       <div
         className={cn(
           "flex items-center justify-center flex-col",
