@@ -36,7 +36,6 @@ export default async function Header() {
           )}
           {!session && (
             <>
-              Not logged in
               <LoginButton />
             </>
           )}

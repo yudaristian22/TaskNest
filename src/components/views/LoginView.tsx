@@ -26,7 +26,7 @@ export default function LoginView() {
           The all-in-one solution for
         </h1>
         <div
-          className="text-3xl md:text-6xl bg-gradient-to-r from-cyan-500 to-blue-500 text-white px-4 p-2 rounded-md py-4
+          className="board text-3xl md:text-6xl  px-4 p-2 rounded-md py-4
         w-fit"
         >
           Team Collaboration
